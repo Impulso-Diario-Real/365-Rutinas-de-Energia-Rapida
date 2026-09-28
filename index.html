@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>365 Rutinas de Energía Rápida</title>
+  
+  <!-- CDN Scripts & Styles -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+    
+    body { 
+      font-family: 'Plus Jakarta Sans', sans-serif; 
+      background-color: #f7f9f6; 
+      color: #1e293b;
+    }
+    
+    .fade-in { 
+      animation: fadeIn 0.25s ease-out; 
+    }
+    
+    @keyframes fadeIn { 
+      from { opacity: 0; transform: translateY(4px); } 
+      to { opacity: 1; transform: translateY(0); } 
+    }
+    
+    .cat-card-gradient {
+      transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s ease;
+    }
+    
+    .cat-card-gradient:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Custom scrollbar for better visual experience */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+  </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col selection:bg-emerald-100 selection:text-emerald-900">
+
+  <!-- BARRA SUPERIOR (HEADER) -->
+  <header class="bg-white border-b border-slate-200/80 px-4 py-3 sticky top-0 z-40 shadow-sm">
+    <div class="max-w-6xl mx-auto flex items-center justify-between gap-4">
+      
+      <!-- Logo y Título -->
+      <button onclick="goHome()" class="flex items-center gap-3 text-left focus:outline-none group">
+        <div class="w-10 h-10 rounded-2xl bg-amber-500 text-white flex items-center justify-center font-bold text-lg shadow-sm group-hover:scale-105 transition-transform">
+          ⚡
+        </div>
+        <div>
+          <span class="text-[10px] font-extrabold tracking-widest text-slate-400 uppercase block leading-none mb-0.5">AGOTAMIENTO CERO</span>
+          <h1 class="font-extrabold text-slate-900 leading-tight text-base sm:text-lg group-hover:text-amber-600 transition-colors">365 Rutinas de Energía Rápida</h1>
+        </div>
+      </button>
+
+      <!-- Racha y Guardadas -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <div class="flex items-center gap-1.5 bg-amber-50 border border-amber-200/80 px-3 py-1.5 rounded-full text-xs font-semibold text-amber-900 shadow-sm">
+          <span>🔥</span>
+          <span>Completadas: <strong id="streak-count">0</strong></span>
+        </div>
+        <button onclick="showSavedRoutines()" class="flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200/80 border border-slate-200 px-3.5 py-1.5 rounded-full text-xs font-semibold text-slate-700 transition-colors">
+          <i class="fa-regular fa-bookmark text-slate-500"></i>
+          <span>Guardadas (<span id="saved-count">0</span>)</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- BANNER CITA DESTACADA -->
+  <div class="bg-emerald-50/70 border-b border-emerald-100/80 px-4 py-2.5 text-center">
+    <p class="max-w-4xl mx-auto text-xs sm:text-sm text-emerald-950 font-medium italic">
+      "No necesitas encontrar una hora libre para cuidarte. A veces necesitas saber qué hacer con los próximos 5 minutos."
+    </p>
+  </div>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <main class="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 md:p-8 space-y-8">
+
+    <!-- 1. PANTALLA INICIAL (HOME) Y EXPLORADOR UNIFICADO DE BÚSQUEDA -->
+    <section id="screen-home" class="fade-in space-y-6">
+      
+      <!-- Título de Selección -->
+      <div class="space-y-2 max-w-3xl">
+        <h2 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">
+          ¿Qué momento estás viviendo ahora mismo?
+        </h2>
+        <p class="text-slate-600 text-sm sm:text-base leading-relaxed">
+          No leas las 365 rutinas. Selecciona tu estado actual y elige una micro-pausa adaptada a tus próximos minutos.
+        </p>
+      </div>
+
+      <!-- Barra de Búsqueda y Botón Explorar -->
+      <div class="flex flex-col sm:flex-row gap-3 pt-1">
+        <div class="relative flex-1">
+          <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+          <input id="global-search" type="text" 
+                 placeholder="Buscar por número (#047, 365) o palabra clave (respirar, estiramiento)..." 
+                 oninput="handleSearch(this.value)"
+                 class="w-full pl-11 pr-10 py-3.5 bg-white border border-slate-200/90 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-600/30 focus:border-emerald-600 text-sm shadow-sm transition-all placeholder:text-slate-400">
+          <button id="clear-search-btn" onclick="clearSearch()" class="hidden absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-sm p-1">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <button onclick="exploreAllRoutines()" class="bg-emerald-800 hover:bg-emerald-900 text-white font-bold px-6 py-3.5 rounded-2xl text-sm transition-all flex items-center justify-center gap-2 shadow-sm whitespace-nowrap">
+          Explorar todas <i class="fa-solid fa-arrow-right text-xs"></i>
+        </button>
+      </div>
+
+      <!-- Resultados de búsqueda dinámicos (se muestran sólo al buscar) -->
+      <div id="search-results-container" class="hidden space-y-4 pt-2">
+        <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+          <h3 id="search-results-title" class="font-extrabold text-slate-800 text-base"></h3>
+          <button onclick="clearSearch()" class="text-xs font-bold text-emerald-800 hover:underline">
+            Cerrar búsqueda
+          </button>
+        </div>
+        <div id="search-results-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+      </div>
+
+      <!-- Grid de Categorías (4 columnas) -->
+      <div id="categories-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 pt-2">
+        <!-- Renderizado dinámicamente -->
+      </div>
+
+    </section>
+
+    <!-- 2. PANTALLA EXPLORADOR DE CATEGORÍA O LISTADO -->
+    <section id="screen-explorer" class="hidden fade-in space-y-6">
+      <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200/80 pb-4">
+        <button onclick="goHome()" class="inline-flex items-center gap-2 text-sm font-bold text-slate-600 hover:text-emerald-800 transition-colors">
+          <i class="fa-solid fa-arrow-left"></i> Volver a inicio
+        </button>
+        <span id="explorer-title" class="text-xs sm:text-sm font-bold text-emerald-900 bg-emerald-100/80 px-3.5 py-1.5 rounded-full border border-emerald-200"></span>
+      </div>
+
+      <!-- Filtros por Duración -->
+      <div class="flex items-center gap-2 overflow-x-auto pb-1 text-xs font-semibold">
+        <span class="text-slate-400 mr-1 whitespace-nowrap">Filtrar por tiempo:</span>
+        <button onclick="filterByDuration('all')" class="dur-filter px-4 py-2 rounded-xl border bg-emerald-800 text-white border-emerald-800 shadow-sm transition-all">Todas</button>
+        <button onclick="filterByDuration(2)" class="dur-filter px-4 py-2 rounded-xl border bg-white text-slate-600 border-slate-200 hover:border-emerald-500 transition-all">⏱ 2 min</button>
+        <button onclick="filterByDuration(5)" class="dur-filter px-4 py-2 rounded-xl border bg-white text-slate-600 border-slate-200 hover:border-emerald-500 transition-all">⏱ 5 min</button>
+        <button onclick="filterByDuration(10)" class="dur-filter px-4 py-2 rounded-xl border bg-white text-slate-600 border-slate-200 hover:border-emerald-500 transition-all">⏱ 10 min</button>
+      </div>
+
+      <!-- Lista de Rutinas -->
+      <div id="routines-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Generado dinámicamente -->
+      </div>
+    </section>
+
+    <!-- 3. PANTALLA DETALLE DE RUTINA -->
+    <section id="screen-detail" class="hidden fade-in max-w-2xl mx-auto space-y-6">
+      <button onclick="goBackToExplorer()" class="inline-flex items-center gap-2 text-sm font-bold text-slate-600 hover:text-emerald-800 transition-colors">
+        <i class="fa-solid fa-arrow-left"></i> Volver al listado
+      </button>
+
+      <div class="bg-white rounded-3xl border border-slate-200/90 shadow-xl overflow-hidden">
+        <!-- Header Rutina -->
+        <div class="bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-950 p-6 sm:p-8 text-white relative">
+          <div class="flex flex-wrap justify-between items-start gap-3 mb-3">
+            <span id="detail-id" class="text-xs font-extrabold tracking-widest text-amber-400 uppercase bg-amber-400/10 px-3 py-1 rounded-full border border-amber-400/20"></span>
+            <div class="flex items-center gap-2">
+              <button id="btn-save-toggle" onclick="toggleSaveCurrentRoutine()" class="text-xs font-semibold text-slate-300 hover:text-white bg-white/10 hover:bg-white/20 px-3 py-1 rounded-full transition-colors flex items-center gap-1.5">
+                <i class="fa-regular fa-bookmark"></i> <span>Guardar</span>
+              </button>
+              <span id="detail-category" class="text-xs font-semibold text-slate-300 bg-white/10 px-3 py-1 rounded-full"></span>
+            </div>
+          </div>
+          <h2 id="detail-title" class="text-2xl sm:text-3xl font-extrabold leading-snug"></h2>
+        </div>
+
+        <!-- Metadatos -->
+        <div class="grid grid-cols-3 border-b border-slate-100 bg-slate-50/60 divide-x divide-slate-100 text-center py-3.5 text-xs font-semibold text-slate-600">
+          <div><i class="fa-regular fa-clock text-amber-500 mb-1 block text-base"></i> <span id="detail-dur"></span></div>
+          <div><i class="fa-solid fa-location-dot text-amber-500 mb-1 block text-base"></i> <span id="detail-loc"></span></div>
+          <div><i class="fa-solid fa-toolbox text-amber-500 mb-1 block text-base"></i> <span id="detail-mat"></span></div>
+        </div>
+
+        <div class="p-6 sm:p-8 space-y-6">
+          <!-- Cuándo utilizarla -->
+          <div class="bg-amber-50/80 border border-amber-200/70 rounded-2xl p-4 text-xs sm:text-sm text-amber-900">
+            <span class="font-bold block text-amber-800 mb-1">💡 ¿CUÁNDO UTILIZARLA?</span>
+            <p id="detail-when" class="leading-relaxed"></p>
+          </div>
+
+          <!-- Pasos Desglosados -->
+          <div class="space-y-4">
+            <h4 class="font-bold text-xs uppercase tracking-wider text-slate-400">¿Qué vas a hacer?</h4>
+            <div id="detail-steps" class="space-y-3">
+              <!-- Pasos dinámicos -->
+            </div>
+          </div>
+
+          <!-- Pequeña Acción Final -->
+          <div class="bg-gradient-to-r from-emerald-800 to-teal-800 rounded-2xl p-5 text-white shadow-md">
+            <span class="text-xs font-bold uppercase tracking-wider text-emerald-200 block mb-1">🌱 Tu pequeña acción de hoy</span>
+            <p id="detail-action" class="font-semibold text-sm sm:text-base leading-snug"></p>
+          </div>
+
+          <!-- Botón de Completar -->
+          <button id="btn-complete" onclick="toggleCompleteCurrentRoutine()"
+                  class="w-full py-4 rounded-2xl font-extrabold text-sm sm:text-base transition-all transform active:scale-95 shadow-md flex items-center justify-center gap-2">
+            <!-- Texto e ícono dinámicos -->
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // 1. CONFIGURACIÓN EXACTA DE LAS 8 CATEGORÍAS
+    const CATEGORIES = [
+      { 
+        id: 'cat-1', 
+        title: 'Rutinas para comenzar el día', 
+        badge: '45 RUTINAS',
+        count: 45,
+        icon: 'fa-regular fa-sun', 
+        gradient: 'from-amber-600/95 via-orange-600/90 to-amber-700/95',
+        img: 'https://images.unsplash.com/photo-1470240731273-7821a6eeb6bd?auto=format&fit=crop&w=600&q=80', 
+        desc: 'Despierta tu cuerpo y mente suavemente sin prisa ni sobreestimulación.' 
+      },
+      { 
+        id: 'cat-2', 
+        title: 'Rutinas para días de trabajo', 
+        badge: '50 RUTINAS',
+        count: 50,
+        icon: 'fa-solid fa-laptop', 
+        gradient: 'from-blue-700/95 via-indigo-700/90 to-blue-900/95',
+        img: 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&w=600&q=80', 
+        desc: 'Micro-pausas entre tareas para evitar el embotamiento frente a las pantallas.' 
+      },
+      { 
+        id: 'cat-3', 
+        title: 'Rutinas para despejar la mente', 
+        badge: '48 RUTINAS',
+        count: 48,
+        icon: 'fa-solid fa-brain', 
+        gradient: 'from-teal-700/95 via-emerald-700/90 to-teal-800/95',
+        img: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&w=600&q=80', 
+        desc: 'Libera la niebla mental y recupera enfoque rápido cuando la mente se llena.' 
+      },
+      { 
+        id: 'cat-4', 
+        title: 'Rutinas para momentos de saturación', 
+        badge: '42 RUTINAS',
+        count: 42,
+        icon: 'fa-solid fa-wind', 
+        gradient: 'from-rose-800/95 via-pink-900/90 to-rose-950/95',
+        img: 'https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&w=600&q=80', 
+        desc: 'Anclas de emergencia para cuando el estrés o la ansiedad parecen abrumar.' 
+      },
+      { 
+        id: 'cat-5', 
+        title: 'Rutinas para recuperar energía', 
+        badge: '45 RUTINAS',
+        count: 45,
+        icon: 'fa-solid fa-bolt', 
+        gradient: 'from-yellow-600/95 via-amber-600/90 to-orange-700/95',
+        img: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&w=600&q=80', 
+        desc: 'Recarga energía física y vitalidad sin depender de cafeína ni azúcares.' 
+      },
+      { 
+        id: 'cat-6', 
+        title: 'Rutinas para hacer una pausa', 
+        badge: '46 RUTINAS',
+        count: 46,
+        icon: 'fa-solid fa-mug-hot', 
+        gradient: 'from-emerald-800/95 via-teal-900/90 to-slate-900/95',
+        img: 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=600&q=80', 
+        desc: 'Detente por completo 5 minutos para resetear tu ritmo cardiaco y presencia.' 
+      },
+      { 
+        id: 'cat-7', 
+        title: 'Rutinas de autocuidado', 
+        badge: '44 RUTINAS',
+        count: 44,
+        icon: 'fa-regular fa-heart', 
+        gradient: 'from-fuchsia-800/95 via-pink-800/90 to-purple-900/95',
+        img: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=600&q=80', 
+        desc: 'Gesto amable de conexión contigo mismo en medio de la rutina diaria.' 
+      },
+      { 
+        id: 'cat-8', 
+        title: 'Rutinas para cerrar el día', 
+        badge: '45 RUTINAS',
+        count: 45,
+        icon: 'fa-regular fa-moon', 
+        gradient: 'from-slate-800/95 via-indigo-950/90 to-slate-950/95',
+        img: 'https://images.unsplash.com/photo-1511295742362-92c96b124e52?auto=format&fit=crop&w=600&q=80', 
+        desc: 'Desconexión laboral y preparación relajante para un descanso profundo.' 
+      }
+    ];
+
+    // BASE DE DATOS DE DIVERSIFICACIÓN PARA LAS 365 RUTINAS
+    const CATEGORY_DATA = {
+      'cat-1': {
+        locs: ["Junto a la cama", "En la cocina", "Cerca de la ventana", "En el balcón"],
+        mats: ["Vaso de agua", "Sin materiales", "Una ventana abierta", "Luz natural"],
+        whens: [
+          "Apenas suena el despertador y sientes pesadez en el cuerpo.",
+          "Cuando quieres iniciar la mañana sin mirar el teléfono de inmediato.",
+          "Para activar tu respiración antes de tu primera tarea del día."
+        ],
+        actions: [
+          "Toma tu primer vaso de agua a temperatura ambiente despacio.",
+          "Mira al cielo por la ventana durante 30 segundos sin pantalla.",
+          "Di una sola intención sencilla para tu jornada."
+        ],
+        templates: [
+          "Activación solar matutina", "Hidratación consciente al despertar", "Despertar articular suave",
+          "Apertura de pecho y ventana", "Respiración revitalizante", "Paseo de ojos y luz natural",
+          "Estiramiento de columna en cama", "Reactivación de planta de pies", "Saludo consciente al día",
+          "Ducha de contraste en manos", "Activación del nervio vago", "Trazado de intención matutina"
+        ]
+      },
+      'cat-2': {
+        locs: ["En tu escritorio", "Silla de trabajo", "Zona de café", "Pasillo de la oficina"],
+        mats: ["Silla", "Sin materiales", "Vaso de agua", "Hoja de notas"],
+        whens: [
+          "Llevas más de 90 minutos seguidos tecleando o en llamadas.",
+          "Entre reunión y reunión para no acumular fatiga mental.",
+          "Sientes los hombros tensos y la espalda sobrecargada."
+        ],
+        actions: [
+          "Cierra las pestañas innecesarias del navegador.",
+          "Ajusta tu pantalla a la altura exacta de tus ojos.",
+          "Haz una pausa de 20 segundos mirando fuera de la pantalla."
+        ],
+        templates: [
+          "Mirada 20-20-20 anti-fatiga", "Desbloqueo de cuello sentado", "Estiramiento gato-vaca en silla",
+          "Respiración entre reuniones", "Liberación de muñecas y tecleo", "Reseteo de postura cervical",
+          "Caminata exprés por agua", "Pausa de flexión de escápulas", "Micro-pausa de ojos cerrados"
+        ]
+      },
+      'cat-3': {
+        locs: ["Lugar tranquilo", "Al aire libre", "En el escritorio", "Sofá"],
+        mats: ["Sin materiales", "Hoja en blanco", "Audífonos"],
+        whens: [
+          "Sientes la cabeza pesada, atascada o con niebla mental.",
+          "Cuando no sabes por cuál tarea empezar debido al exceso de ideas.",
+          "A mitad de la tarde cuando el rendimiento intelectual decae."
+        ],
+        actions: [
+          "Apunta la idea que te preocupa en una hoja y déjala a un lado.",
+          "Sal a respirar aire fresco por 2 minutos.",
+          "Haz una sola cosa a la vez durante los próximos 20 minutos."
+        ],
+        templates: [
+          "Escritura de vaciado mental", "Respiración en caja 4-4-4-4", "Oxigenación exprés en ventana",
+          "Conexión con 5 sentidos", "Scan de tensión craneal", "Danza corta de brazos",
+          "Pausa de agua y silencio", "Eliminación de ruido auditivo", "Recorrido de atención focal"
+        ]
+      },
+      'cat-4': {
+        locs: ["Espacio reservado", "Baño o zona privada", "Donde estés sentado"],
+        mats: ["Sin materiales", "Vaso de agua fría", "Compresa o paño"],
+        whens: [
+          "Sientes aceleración cardiaca, prisa interna o sobrecarga emocional.",
+          "Cuando recibes una noticia molesta o un correo estresante.",
+          "En picos de ansiedad donde necesitas un ancla inmediata."
+        ],
+        actions: [
+          "Toma tres tragos de agua muy fría sintiendo el recorrido.",
+          "Coloca tu mano derecha firmemente sobre el centro del pecho.",
+          "Acepta detenerte 3 minutos antes de responder cualquier mensaje."
+        ],
+        templates: [
+          "Ancla de tierra 5-4-3-2-1", "Suspiro fisiológico neuro-regulador", "Compresión firme de hombros",
+          "Lavado de manos con agua fría", "Respiración 4-7-8 sedante", "Anclaje de pies en el piso"
+        ]
+      },
+      'cat-5': {
+        locs: ["Al aire libre", "Pasillo", "Sala", "Junto a la ventana"],
+        mats: ["Sin materiales", "Agua con limón", "Música rítmica"],
+        whens: [
+          "Sientes somnolencia post-almuerzo o bajón de energía a las 3 PM.",
+          "Antes de una actividad importante cuando te falta chispa.",
+          "Para sustituir el segundo o tercer café de la jornada."
+        ],
+        actions: [
+          "Haz 10 saltos suaves o sentadillas para reactivar la sangre.",
+          "Bebe un vaso con agua fresca e inhalaciones rápidas.",
+          "Sonríe conscientemente durante 15 segundos."
+        ],
+        templates: [
+          "Sentadillas de recarga rápida", "Respiración de fuego energizante", "Caminata a ritmo ligero",
+          "Estiramiento dinámico de brazos", "Avanzadas y apertura de cadera", "Música de alto tempo 3 min"
+        ]
+      },
+      'cat-6': {
+        locs: ["Sofá", "Silla cómoda", "Sombra de un árbol", "Cocina"],
+        mats: ["Taza de té o infusión", "Sin materiales", "Silla"],
+        whens: [
+          "Llevas un ritmo frenético y necesitas presionar el botón de 'Pausa'.",
+          "Al terminar una tarea compleja antes de pasar a la siguiente.",
+          "Para disfrutar de una bebida sin mirar ninguna pantalla."
+        ],
+        actions: [
+          "Deja el teléfono en otra habitación mientras tomas tu pausa.",
+          "Siente el calor de una taza entre tus manos sin prisa.",
+          "Observa los detalles del entorno sin juzgar nada."
+        ],
+        templates: [
+          "Infusión de 5 minutos en silencio", "Pausa de 5 minutos (#047)", "Micro-descanso en ventana",
+          "Pausa de respiración y descanso", "Contemplación de paisaje", "Pausa de 5 minutos sin pantallas"
+        ]
+      },
+      'cat-7': {
+        locs: ["En el hogar", "Espacio acogedor", "Habitación", "Frente al espejo"],
+        mats: ["Crema hidratante", "Aceite esencial", "Espejo", "Cuaderno"],
+        whens: [
+          "Cuando has estado cuidando a otros y te has olvidado de ti.",
+          "Para regalarte un momento de amabilidad sin exigencias.",
+          "Al sentir autocrítica o cansancio acumulado."
+        ],
+        actions: [
+          "Aplícate crema en las manos dándote un suave masaje.",
+          "Apunta 3 cosas sencillas que aprecias de ti hoy.",
+          "Dite una palabra de aliento frente al espejo."
+        ],
+        templates: [
+          "Masaje hidratante de manos", "Gratitud de 3 cosas vividas", "Auto-compasión ante el espejo",
+          "Aromaterapia de 2 minutos", "Relajación de mandíbula y ceño", "Pausa de postura de auto-abrazo"
+        ]
+      },
+      'cat-8': {
+        locs: ["En la cama", "Habitación", "Sofá por la noche", "Zona de descanso"],
+        mats: ["Cuaderno de noche", "Luz tenue", "Sin pantallas"],
+        whens: [
+          "Al apagar la computadora o terminar la jornada de trabajo.",
+          "30 minutos antes de dormir para bajar las revoluciones.",
+          "Cuando tu mente repite la lista de pendientes de mañana."
+        ],
+        actions: [
+          "Escribe la lista de pendientes de mañana para sacarla de tu mente.",
+          "Apaga o aleja las pantallas con luz azul.",
+          "Realiza 5 respiraciones profundas alargando la exhalación."
+        ],
+        templates: [
+          "Cierre del día laboral y apagar", "Descarga de pendientes de mañana", "Estiramiento de cama para dormir",
+          "Escaneo corporal de relajación", "Respiración 4-7-8 nocturna", "Oscurecimiento de luces"
+        ]
+      }
+    };
+
+    // GENERAR LAS 365 RUTINAS UNICAS
+    const ALL_ROUTINES = [];
+    let currentGlobalNumber = 1;
+
+    CATEGORIES.forEach(cat => {
+      const data = CATEGORY_DATA[cat.id];
+      const count = cat.count;
+
+      for (let i = 0; i < count; i++) {
+        const num = currentGlobalNumber;
+        const paddedId = String(num).padStart(3, '0');
+        
+        let titleName = "";
+        if (num === 47) {
+          titleName = "PAUSA DE 5 MINUTOS (#047)";
+        } else {
+          const tName = data.templates[i % data.templates.length];
+          titleName = `${tName.toUpperCase()} #${paddedId}`;
+        }
+        
+        const duration = (num % 3 === 0) ? 10 : ((num % 2 === 0) ? 2 : 5);
+        const loc = data.locs[i % data.locs.length];
+        const mat = data.mats[i % data.mats.length];
+        const when = data.whens[i % data.whens.length];
+        const action = data.actions[i % data.actions.length];
+
+        const steps = [
+          { min: "1 min", title: "1. PREPARACIÓN Y POSTURA", desc: `Ubícate en ${loc.toLowerCase()} y toma postura erguida pero relajada.` },
+          { min: `${Math.max(1, duration - 2)} min`, title: "2. EJECUCIÓN PRINCIPAL", desc: `Ejecuta la técnica de ${titleName.toLowerCase()} concentrándote en el ritmo suave de tu respiración.` },
+          { min: "1 min", title: "3. CIERRE Y REINTEGRACIÓN", desc: "Agradece este tiempo dedicado a tu bienestar y regresa con calma a tu actividad." }
+        ];
+
+        ALL_ROUTINES.push({
+          id: `routine-${num}`,
+          numValue: num,
+          number: `#${paddedId}`,
+          title: titleName,
+          category: cat.title,
+          categoryId: cat.id,
+          duration: duration,
+          location: loc,
+          materials: mat,
+          when: when,
+          steps: steps,
+          action: action
+        });
+
+        currentGlobalNumber++;
+      }
+    });
+
+    // ESTADO DE LA APLICACIÓN
+    let completedSet = new Set(JSON.parse(localStorage.getItem('365_completed') || '[]'));
+    let savedSet = new Set(JSON.parse(localStorage.getItem('365_saved') || '[]'));
+    let currentCategory = null;
+    let currentDurationFilter = 'all';
+    let activeRoutine = null;
+
+    // INICIALIZAR AL CARGAR
+    document.addEventListener('DOMContentLoaded', () => {
+      renderCategoriesGrid();
+      updateHeaderCounts();
+    });
+
+    function updateHeaderCounts() {
+      document.getElementById('streak-count').innerText = completedSet.size;
+      document.getElementById('saved-count').innerText = savedSet.size;
+      localStorage.setItem('365_completed', JSON.stringify([...completedSet]));
+      localStorage.setItem('365_saved', JSON.stringify([...savedSet]));
+    }
+
+    // RENDERIZAR CATEGORÍAS
+    function renderCategoriesGrid() {
+      const grid = document.getElementById('categories-grid');
+      grid.innerHTML = CATEGORIES.map(cat => `
+        <div onclick="selectCategory('${cat.id}')" 
+             class="cat-card-gradient cursor-pointer relative rounded-3xl overflow-hidden h-64 sm:h-72 shadow-sm border border-slate-200/50 flex flex-col justify-between p-5 text-white group">
+          
+          <img src="${cat.img}" alt="${cat.title}" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+          <div class="absolute inset-0 bg-gradient-to-b ${cat.gradient}"></div>
+
+          <div class="relative z-10 flex justify-between items-start">
+            <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/20 backdrop-blur-md text-white text-sm">
+              <i class="${cat.icon}"></i>
+            </span>
+            <span class="text-[10px] font-extrabold tracking-wider bg-slate-900/60 backdrop-blur-md text-white px-2.5 py-1 rounded-full uppercase">
+              ${cat.badge}
+            </span>
+          </div>
+
+          <div class="relative z-10 space-y-1.5">
+            <h3 class="font-extrabold text-lg sm:text-xl leading-snug text-white group-hover:text-amber-200 transition-colors">
+              ${cat.title}
+            </h3>
+            <p class="text-xs text-white/80 line-clamp-2 font-normal leading-relaxed">
+              ${cat.desc}
+            </p>
+          </div>
+
+        </div>
+      `).join('');
+    }
+
+    // MANEJO DE BÚSQUEDA SUAVE
+    function handleSearch(term) {
+      const clearBtn = document.getElementById('clear-search-btn');
+      const resultsContainer = document.getElementById('search-results-container');
+      const resultsTitle = document.getElementById('search-results-title');
+      const resultsList = document.getElementById('search-results-list');
+      const categoriesGrid = document.getElementById('categories-grid');
+
+      const query = term.trim().toLowerCase().replace('#', '');
+
+      if (!query) {
+        clearBtn.classList.add('hidden');
+        resultsContainer.classList.add('hidden');
+        categoriesGrid.classList.remove('hidden');
+        return;
+      }
+
+      clearBtn.classList.remove('hidden');
+
+      // Filtrar rutinas por número, título o descripción
+      const filtered = ALL_ROUTINES.filter(r => {
+        const numStr = String(r.numValue);
+        const paddedNum = String(r.numValue).padStart(3, '0');
+        return numStr.includes(query) || 
+               paddedNum.includes(query) || 
+               r.title.toLowerCase().includes(query) || 
+               r.when.toLowerCase().includes(query) ||
+               r.category.toLowerCase().includes(query);
+      });
+
+      resultsTitle.innerText = `Resultados para "${term}" (${filtered.length})`;
+      categoriesGrid.classList.add('hidden');
+      resultsContainer.classList.remove('hidden');
+
+      if (filtered.length === 0) {
+        resultsList.innerHTML = `
+          <div class="col-span-full text-center py-8 text-slate-500 text-sm bg-white rounded-2xl border border-slate-200 p-6">
+            No se encontró ninguna rutina para <strong>"${term}"</strong>. Prueba buscar un número entre 1 y 365 o palabras como <em>"estiramiento"</em>, <em>"respiración"</em> o <em>"pausa"</em>.
+          </div>
+        `;
+        return;
+      }
+
+      resultsList.innerHTML = filtered.map(r => renderRoutineCardHtml(r)).join('');
+    }
+
+    function clearSearch() {
+      const input = document.getElementById('global-search');
+      input.value = '';
+      handleSearch('');
+    }
+
+    // NAVEGACIÓN ENTRE PANTALLAS
+    function goHome() {
+      clearSearch();
+      document.getElementById('screen-home').classList.remove('hidden');
+      document.getElementById('screen-explorer').classList.add('hidden');
+      document.getElementById('screen-detail').classList.add('hidden');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function showScreen(screenId) {
+      document.getElementById('screen-home').classList.add('hidden');
+      document.getElementById('screen-explorer').classList.add('hidden');
+      document.getElementById('screen-detail').classList.add('hidden');
+      document.getElementById(`screen-${screenId}`).classList.remove('hidden');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function selectCategory(catId) {
+      currentCategory = CATEGORIES.find(c => c.id === catId);
+      document.getElementById('explorer-title').innerText = `${currentCategory.title}`;
+      currentDurationFilter = 'all';
+      resetFilterButtonsUI();
+      renderRoutines();
+      showScreen('explorer');
+    }
+
+    function exploreAllRoutines() {
+      currentCategory = null;
+      document.getElementById('explorer-title').innerText = `Todas las 365 Rutinas de Energía`;
+      currentDurationFilter = 'all';
+      resetFilterButtonsUI();
+      renderRoutines(ALL_ROUTINES);
+      showScreen('explorer');
+    }
+
+    function showSavedRoutines() {
+      currentCategory = null;
+      const savedList = ALL_ROUTINES.filter(r => savedSet.has(r.id));
+      document.getElementById('explorer-title').innerText = `🔖 Rutinas Guardadas (${savedList.length})`;
+      currentDurationFilter = 'all';
+      resetFilterButtonsUI();
+      renderRoutines(savedList);
+      showScreen('explorer');
+    }
+
+    function resetFilterButtonsUI() {
+      document.querySelectorAll('.dur-filter').forEach((btn, index) => {
+        if (index === 0) {
+          btn.className = 'dur-filter px-4 py-2 rounded-xl border bg-emerald-800 text-white border-emerald-800 shadow-sm transition-all';
+        } else {
+          btn.className = 'dur-filter px-4 py-2 rounded-xl border bg-white text-slate-600 border-slate-200 hover:border-emerald-500 transition-all';
+        }
+      });
+    }
+
+    function filterByDuration(dur) {
+      currentDurationFilter = dur;
+      const buttons = document.querySelectorAll('.dur-filter');
+      buttons.forEach(btn => {
+        btn.className = 'dur-filter px-4 py-2 rounded-xl border bg-white text-slate-600 border-slate-200 hover:border-emerald-500 transition-all';
+      });
+      event.target.className = 'dur-filter px-4 py-2 rounded-xl border bg-emerald-800 text-white border-emerald-800 shadow-sm transition-all';
+      renderRoutines();
+    }
+
+    function renderRoutineCardHtml(r) {
+      const isDone = completedSet.has(r.id);
+      const isSaved = savedSet.has(r.id);
+      return `
+        <div onclick="openRoutineDetail('${r.id}')" 
+             class="cursor-pointer bg-white rounded-2xl p-4 border ${isDone ? 'border-emerald-300 bg-emerald-50/20' : 'border-slate-200/80'} hover:border-emerald-600 transition-all shadow-sm hover:shadow-md flex items-center justify-between gap-3 group">
+          <div class="space-y-1">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="text-xs font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-200/60">${r.number}</span>
+              <span class="text-xs font-semibold px-2 py-0.5 bg-slate-100 text-slate-600 rounded-md">⏱ ${r.duration} MIN</span>
+              ${isDone ? '<span class="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-md">✔ COMPLETADA</span>' : ''}
+              ${isSaved ? '<span class="text-[10px] font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md">🔖 GUARDADA</span>' : ''}
+            </div>
+            <h4 class="font-bold text-slate-800 text-sm group-hover:text-emerald-800 transition-colors">${r.title}</h4>
+            <p class="text-xs text-slate-500 line-clamp-1">${r.when}</p>
+          </div>
+          <i class="fa-solid fa-chevron-right text-slate-300 group-hover:text-emerald-700 transition-colors"></i>
+        </div>
+      `;
+    }
+
+    function renderRoutines(customList = null) {
+      const listContainer = document.getElementById('routines-list');
+      let list = customList || (currentCategory ? ALL_ROUTINES.filter(r => r.categoryId === currentCategory.id) : ALL_ROUTINES);
+
+      if (currentDurationFilter !== 'all') {
+        list = list.filter(r => r.duration === Number(currentDurationFilter));
+      }
+
+      if (list.length === 0) {
+        listContainer.innerHTML = `<div class="col-span-full text-center py-12 text-slate-400 text-sm bg-white rounded-2xl border border-slate-200">No se encontraron rutinas con los filtros seleccionados.</div>`;
+        return;
+      }
+
+      listContainer.innerHTML = list.map(r => renderRoutineCardHtml(r)).join('');
+    }
+
+    function openRoutineDetail(routineId) {
+      activeRoutine = ALL_ROUTINES.find(r => r.id === routineId);
+      document.getElementById('detail-id').innerText = `⚡ RUTINA ${activeRoutine.number}`;
+      document.getElementById('detail-category').innerText = activeRoutine.category;
+      document.getElementById('detail-title').innerText = activeRoutine.title;
+      document.getElementById('detail-dur').innerText = `${activeRoutine.duration} MIN`;
+      document.getElementById('detail-loc').innerText = activeRoutine.location;
+      document.getElementById('detail-mat').innerText = activeRoutine.materials;
+      document.getElementById('detail-when').innerText = activeRoutine.when;
+      document.getElementById('detail-action').innerText = activeRoutine.action;
+
+      document.getElementById('detail-steps').innerHTML = activeRoutine.steps.map(s => `
+        <div class="p-3.5 bg-slate-50 border border-slate-100 rounded-xl flex items-start gap-3">
+          <span class="text-xs font-bold text-emerald-800 bg-emerald-100 px-2 py-1 rounded-md whitespace-nowrap">${s.min}</span>
+          <div>
+            <h5 class="font-bold text-xs sm:text-sm text-slate-800">${s.title}</h5>
+            <p class="text-xs text-slate-600 mt-0.5 leading-relaxed">${s.desc}</p>
+          </div>
+        </div>
+      `).join('');
+
+      updateSaveButtonState();
+      updateButtonState();
+      showScreen('detail');
+    }
+
+    function updateSaveButtonState() {
+      const btn = document.getElementById('btn-save-toggle');
+      if (savedSet.has(activeRoutine.id)) {
+        btn.innerHTML = `<i class="fa-solid fa-bookmark text-amber-400"></i> <span>Guardada</span>`;
+      } else {
+        btn.innerHTML = `<i class="fa-regular fa-bookmark"></i> <span>Guardar</span>`;
+      }
+    }
+
+    function toggleSaveCurrentRoutine() {
+      if (!activeRoutine) return;
+      if (savedSet.has(activeRoutine.id)) {
+        savedSet.delete(activeRoutine.id);
+      } else {
+        savedSet.add(activeRoutine.id);
+      }
+      updateHeaderCounts();
+      updateSaveButtonState();
+    }
+
+    function updateButtonState() {
+      const btn = document.getElementById('btn-complete');
+      const isDone = completedSet.has(activeRoutine.id);
+
+      if (isDone) {
+        btn.className = "w-full py-4 rounded-2xl font-extrabold text-sm sm:text-base transition-all bg-emerald-100 text-emerald-900 border border-emerald-300 flex items-center justify-center gap-2 hover:bg-emerald-200";
+        btn.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-700"></i> ¡Completada! (Haz clic para desmarcar)`;
+      } else {
+        btn.className = "w-full py-4 rounded-2xl font-extrabold text-sm sm:text-base transition-all bg-emerald-800 hover:bg-emerald-900 text-white shadow-md flex items-center justify-center gap-2";
+        btn.innerHTML = `<i class="fa-solid fa-bolt"></i> ¡Completé esta rutina hoy!`;
+      }
+    }
+
+    function toggleCompleteCurrentRoutine() {
+      if (!activeRoutine) return;
+      const isDone = completedSet.has(activeRoutine.id);
+
+      if (isDone) {
+        completedSet.delete(activeRoutine.id);
+      } else {
+        completedSet.add(activeRoutine.id);
+        if (typeof confetti === 'function') {
+          confetti({
+            particleCount: 90,
+            spread: 70,
+            origin: { y: 0.7 }
+          });
+        }
+      }
+
+      updateHeaderCounts();
+      updateButtonState();
+    }
+
+    function goBackToExplorer() {
+      const searchInput = document.getElementById('global-search');
+      if (searchInput.value.trim() !== '') {
+        showScreen('home');
+      } else if (currentCategory) {
+        showScreen('explorer');
+      } else {
+        showScreen('home');
+      }
+    }
+  </script>
+</body>
+</html>
